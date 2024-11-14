@@ -4,8 +4,6 @@ void	capitalize(char *str)
 {
 	int i = 0;
 
-	// while (str[i] == ' ' || str[i] == '\t')
-	// 	i++;
 	while (str[i])
 	{
 		if (str[i] >= 'A' && str[i] <= 'Z')
