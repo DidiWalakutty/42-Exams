@@ -1,5 +1,14 @@
 #include <unistd.h>
 
+void	write_first_word(char *str, int begin, int end)
+{
+	while (begin < end)
+	{
+		write(1, &str[begin], 1);
+		begin++;
+	}
+}
+
 int	is_space(char c)
 {
 	if (c == ' ' || c == '\t')
@@ -9,19 +18,21 @@ int	is_space(char c)
 
 int	main(int argc, char **argv)
 {
-	if (argc == 2)
+	if (argc >= 2)
 	{
-		char *str = argv[1];
-		int start = 0;
-		int end = 0;
+		char *str;
+		int begin_word = 0;
+		int end_word = 0;
 		int i = 0;
-		while (str[i] && is_space(str[i]))
+
+		str = argv[1];
+		while (is_space(str[i]))
 			i++;
-		start = i;
+		begin_word = i;
 		while (str[i] && !is_space(str[i]))
 			i++;
-		end = i;
-		while (str[i] && is_space(str[i]))
+		end_word = i;
+		while (is_space(str[i]))
 			i++;
 		if (str[i])
 		{
@@ -42,11 +53,7 @@ int	main(int argc, char **argv)
 			}
 			write(1, " ", 1);
 		}
-		while (start <= end)
-		{
-			write(1, &str[start], 1);
-			start++;
-		}
+		write_first_word(str, begin_word, end_word);
 	}
 	write(1, "\n", 1);
 }
