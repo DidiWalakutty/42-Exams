@@ -11,7 +11,6 @@ void	capitalize(char *str)
 {
 	int i = 0;
 
-	// printf("in capitalize\n");
 	while (str[i])
 	{
 		if (str[i] >= 'A' && str[i] <= 'Z')
