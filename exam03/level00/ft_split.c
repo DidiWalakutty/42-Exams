@@ -62,7 +62,7 @@ char    **ft_split(char *str)
 #include <stdio.h>
 int	main()
 {
-	char *str = "And if that\nmakes you \thappythen I'm not\ttheonly\n one lying";
+	char *str = "   It's\t as     clear\n\n as    the sunrise\t in Sedona";
 	char **result;
 
 	result = ft_split(str);
@@ -72,5 +72,4 @@ int	main()
 		printf("Word %i: |%s|\n", i + 1, result[i]);
 		i++;
 	}
-	printf("done\n");
 }
