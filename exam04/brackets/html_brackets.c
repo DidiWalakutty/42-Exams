@@ -39,15 +39,17 @@ void lst_add_back(t_list **lst, t_list *new)
 
 int check_words(t_list **stack, char *word) 
 {
-	t_list *previous = NULL;
+	if (*stack == NULL)
+		return (1);
 	t_list *current = *stack;
+	t_list *previous = NULL;
 
-	while (current && current->next)
+	while (current->next)
 	{
 		previous = current;
 		current = current->next;
 	}
-	if (current && strcmp(current->value, word) == 0)
+	if (strcmp(current->value, word) == 0)
 	{
 		if (previous == NULL)
 			*stack = NULL;
@@ -57,8 +59,7 @@ int check_words(t_list **stack, char *word)
 		free(current);
 		return (0);
 	}
-	else
-		return (1);
+	return (1);
 }
 
 char *tag_extractor(char *str, int len) 
@@ -83,38 +84,40 @@ int tag_validator(char *str)
 
 	while (str[i]) 
 	{
+		// first one can not be start
 		if (str[i] == '<' && str[i + 1] != '/') 
 		{
 			// Find start of angle bracket
-			int j = i + 1;
+			int start = i + 1;
 			while (str[i] != '>')
 				i++;
 			if (str[i] == '>') 
 			{
 				// Extract word and either add to stack or do nothing.
-				int len = i - j;
-				char *word = tag_extractor(&str[j], len);
+				int len = i - start;
+				char *word = tag_extractor(&str[start], len);
 				if (strcmp(word, "img") == 0)
-					i = j;
+					i = start;
 				else 
 				{
 					t_list *new_node = init_node(word);
 					lst_add_back(&stack, new_node);
 				}
 			}
-			i = j;
+			i = start;
 		}
 		if (str[i] == '<' && str[i + 1] == '/') 
 		{
-			int j = i + 2;
+			int start = i + 2;
 			while (str[i] != '>')
 				i++;
 			if (str[i] == '>') 
 			{
-				int len = i - j;
-				char *word = tag_extractor(&str[j], len);
+				int len = i - start;
+				char *word = tag_extractor(&str[start], len);
 				if (check_words(&stack, word) == 1) 
 				{
+					// remove last element of the linked list.
 					free(word);
 					t_list *temp;
 					while (stack) 
@@ -128,7 +131,7 @@ int tag_validator(char *str)
 				}
 				free(word);
 			}
-			i = j;
+			i = start;
 		}
 		i++;
 	}
