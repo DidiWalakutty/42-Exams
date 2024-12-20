@@ -21,11 +21,13 @@ examples:
     &lt;/second_tag_name&gt;
 &lt;/test&gt;
 	is correct
-3. &lt;test&gt;
-    &lt;second_tag_name&gt;
-        &lt;third&gt;
-    &lt;/second_tag_name&gt;
-&lt;/test&gt;
+3. ```
+<test>
+    <second_tag_name>
+        <third>
+    </second_tag_name>
+</test>
+```
 	is incorrect (not closing third)
 
 <img> is an exception and selfclosing. It has no content 
