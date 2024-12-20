@@ -21,13 +21,12 @@ examples:
     &lt;/second_tag_name&gt;
 &lt;/test&gt;
 	is correct
-3. ```
+3.```text
 <test>
     <second_tag_name>
         <third>
     </second_tag_name>
 </test>
-```
 	is incorrect (not closing third)
 
 <img> is an exception and selfclosing. It has no content 
