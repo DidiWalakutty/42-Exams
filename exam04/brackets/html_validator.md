@@ -12,7 +12,7 @@ If no arguments, return 1.
 </test> is a closing tag.
 
 examples:
-1. <test> </test>
+1. '<test>' </test>
 	is correct
 2. <test>
 		<second_tag_name>
