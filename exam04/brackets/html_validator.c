@@ -1,34 +1,33 @@
 #include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-typedef struct s_list 
+typedef struct s_list
 {
-	char *value;
-	struct s_list *next;
-} 	t_list;
+	char			*tag;
+	struct s_list	*next;
+}	t_list;
 
-t_list *init_node(char *value) 
+t_list	*init_node(char *tag)
 {
-	t_list *new_node = malloc(sizeof(t_list));
-	new_node->value = value;
-	new_node->next = NULL;
-	return (new_node);
+	t_list *new = malloc(sizeof(t_list));
+	new->tag = tag;
+	new->next = NULL;
+	return (new);
 }
 
-t_list *lst_last(t_list *lst) 
+t_list	*lst_last(t_list *lst)
 {
-	while (lst && lst->next) 
-	{
+	while (lst && lst->next)
 		lst = lst->next;
-	}
 	return (lst);
 }
 
-void lst_add_back(t_list **lst, t_list *new) 
+void	lst_add_back(t_list **lst, t_list *new)
 {
-	t_list *back;
-	if (*lst) 
+	t_list	*back;
+	if (*lst)
 	{
 		back = lst_last(*lst);
 		back->next = new;
@@ -37,36 +36,10 @@ void lst_add_back(t_list **lst, t_list *new)
 		*lst = new;
 }
 
-int check_words(t_list **stack, char *word) 
+char *extract_tag(char *str, int len)
 {
-	if (*stack == NULL)
-		return (1);
-	t_list *current = *stack;
-	t_list *previous = NULL;
-
-	while (current->next)
-	{
-		previous = current;
-		current = current->next;
-	}
-	if (strcmp(current->value, word) == 0)
-	{
-		if (previous == NULL)
-			*stack = NULL;
-		else
-			previous->next = NULL;
-		free(current->value);
-		free(current);
-		return (0);
-	}
-	return (1);
-}
-
-char *tag_extractor(char *str, int len) 
-{
-	char *tag = malloc(sizeof(char) * len + 1);
+	char *tag = malloc(sizeof(char) * (len + 1));
 	int i = 0;
-	
 	while (i < len && str[i] != ' ' && str[i] != '/')
 	{
 		tag[i] = str[i];
@@ -76,58 +49,90 @@ char *tag_extractor(char *str, int len)
 	return (tag);
 }
 
-int tag_validator(char *str) 
+int	check_words(t_list **stack, char *word, int len)
 {
-	int i = 0;
-	// Create a linked list stack where we can put all our words in.
-	t_list *stack = NULL;
+	if (*stack == NULL)
+		return (1);
 
-	while (str[i]) 
+	// Create a node where we can check if the last node in the stack
+	// is the same as the given closing word.
+	t_list *current = *stack;
+	t_list *previous = NULL;
+
+	while (current->next)
 	{
-		// first one can not be start
-		if (str[i] == '<' && str[i + 1] != '/') 
+		previous = current;
+		current = current->next;
+	}
+	if (strncmp(current->tag, word, len) == 0)
+	{
+		// If they match, we pop the opening tag from the stack
+		if (previous == NULL) // If there's only one tag in the stack
+			*stack = NULL;
+		else
+			previous->next = NULL;
+		free(current->tag);
+		free(current);
+		// We can remove this node, because it has been
+		// correctly matched.
+		return (0);
+	}
+	return (1);
+}
+
+int	validator(char *str)
+{
+	int	i = 0;
+	t_list	*stack = NULL;
+
+	while (str[i])
+	{
+		// Search for the opening tag and extract the word
+		if (str[i] == '<' && str[i + 1] != '/')
 		{
-			// Find start of angle bracket
 			int start = i + 1;
 			while (str[i] != '>')
 				i++;
-			if (str[i] == '>') 
+			if (str[i] == '>')
 			{
-				// Extract word and either add to stack or do nothing.
 				int len = i - start;
-				char *word = tag_extractor(&str[start], len);
-				if (strcmp(word, "img") == 0)
+				char *word = extract_tag(&str[start], len);
+				if (strncmp(word, "img", 3) == 0)
 					i = start;
-				else 
+				else
 				{
+					// If it's not 'img', we add it to the stack
 					t_list *new_node = init_node(word);
 					lst_add_back(&stack, new_node);
 				}
 			}
 			i = start;
 		}
-		if (str[i] == '<' && str[i + 1] == '/') 
+		// Search for the closing tag and extract the word
+		if (str[i] == '<' && str[i + 1] == '/')
 		{
 			int start = i + 2;
 			while (str[i] != '>')
 				i++;
-			if (str[i] == '>') 
+			if (str[i] == '>')
 			{
 				int len = i - start;
-				char *word = tag_extractor(&str[start], len);
-				if (check_words(&stack, word) == 1) 
+				char *word = extract_tag(&str[start], len);
+				// Check if the words and position are correct for the tag.
+				if (check_words(&stack, word, len) == 1)
 				{
-					// remove last element of the linked list.
+					// It's not a match
 					free(word);
 					t_list *temp;
-					while (stack) 
+					while (stack)
 					{
 						temp = stack;
 						stack = stack->next;
-						free(temp->value);
-						free(temp);
-						return (1);
+						free(temp->tag);
+						free(temp); // Clean up the remaining stack
 					}
+					// Return an error
+					return (1);
 				}
 				free(word);
 			}
@@ -135,35 +140,35 @@ int tag_validator(char *str)
 		}
 		i++;
 	}
-	if (stack != NULL) 
+	// If there are any unclosed tags, we free the stack and return an error.
+	if (stack != NULL)
 	{
 		t_list *temp;
-		while (stack) 
+		while (stack)
 		{
 			temp = stack;
 			stack = stack->next;
-			free(temp->value);
+			free(temp->tag);
 			free(temp);
-		}		
+		}
 		return (1);
 	}
-	else
-		return (0);
+	return (0);
 }
 
-int main(int argc, char **argv) 
+int	main(int argc, char **argv)
 {
-	int i = 1;
-
-	if (argc == 1)
-		return(write(1, "\n", 1));
-	while (argv[i]) 
+	if (argc != 2)
+		return (1);
+	if (argv[1][0] != '\0')
 	{
-		if (tag_validator(argv[i]) == 0) 
-			write(1, "OK\n", 3);
-		else
-			write(1, "Error\n", 6);
-		i++;
+		if (validator(argv[1]) == 0)
+		{
+			printf("0\n");
+			return (0);
+		}
+		printf("1\n");
+		return (1);
 	}
-	return (0);
+	return (1);
 }
