@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 typedef struct s_list
 {
@@ -9,15 +8,15 @@ typedef struct s_list
 	struct s_list	*next;
 }	t_list;
 
-t_list	*init_node(char *tag)
+t_list	*init_node(char *word)
 {
 	t_list *new = malloc(sizeof(t_list));
-	new->tag = tag;
+	new->tag = word;
 	new->next = NULL;
 	return (new);
 }
 
-t_list	*lst_last(t_list *lst)
+t_list *last_node(t_list *lst)
 {
 	while (lst && lst->next)
 		lst = lst->next;
@@ -26,20 +25,20 @@ t_list	*lst_last(t_list *lst)
 
 void	lst_add_back(t_list **lst, t_list *new)
 {
-	t_list	*back;
+	t_list *back;
 	if (*lst)
 	{
-		back = lst_last(*lst);
+		back = last_node(*lst);
 		back->next = new;
 	}
 	else
 		*lst = new;
 }
 
-char *extract_tag(char *str, int len)
+char	*extract_tag(char *str, int len)
 {
-	char *tag = malloc(sizeof(char) * (len + 1));
 	int i = 0;
+	char *tag = malloc(sizeof(char) * (len + 1));
 	while (i < len && str[i] != ' ' && str[i] != '/')
 	{
 		tag[i] = str[i];
@@ -49,45 +48,50 @@ char *extract_tag(char *str, int len)
 	return (tag);
 }
 
-int	check_words(t_list **stack, char *word, int len)
+int ft_strlen(char *str)
 {
-	if (*stack == NULL)
-		return (1);
+	int i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
 
-	// Create a node where we can check if the last node in the stack
-	// is the same as the given closing word.
-	t_list *current = *stack;
+int	check_match(t_list **lst, char *word, int len)
+{
+	if (*lst == NULL)
+		return (1);
+	t_list *current = *lst;
 	t_list *previous = NULL;
 
-	while (current->next)
+	while (current && current->next)
 	{
 		previous = current;
 		current = current->next;
 	}
-	if (strncmp(current->tag, word, len) == 0)
+	if (len == ft_strlen(current->tag))
 	{
-		// If they match, we pop the opening tag from the stack
-		if (previous == NULL) // If there's only one tag in the stack
-			*stack = NULL;
-		else
-			previous->next = NULL;
-		free(current->tag);
-		free(current);
-		// We can remove this node, because it has been
-		// correctly matched.
-		return (0);
+		if (current && strncmp(current->tag, word, len) == 0)
+		{
+			if (previous == NULL)
+				*lst = NULL;
+			else
+				previous->next = NULL;
+			free(current->tag);
+			free(current);
+			return (0);
+		}
 	}
-	return (1);
+	else
+		return (1);
 }
 
 int	validator(char *str)
 {
-	int	i = 0;
-	t_list	*stack = NULL;
+	int i = 0;
+	t_list *stack = NULL;
 
 	while (str[i])
 	{
-		// Search for the opening tag and extract the word
 		if (str[i] == '<' && str[i + 1] != '/')
 		{
 			int start = i + 1;
@@ -98,17 +102,16 @@ int	validator(char *str)
 				int len = i - start;
 				char *word = extract_tag(&str[start], len);
 				if (strncmp(word, "img", 3) == 0)
-					i = start;
+					free(word);
 				else
 				{
-					// If it's not 'img', we add it to the stack
-					t_list *new_node = init_node(word);
-					lst_add_back(&stack, new_node);
+					t_list *new = init_node(word);
+					lst_add_back(&stack, new);
+					// free(word);
 				}
 			}
 			i = start;
 		}
-		// Search for the closing tag and extract the word
 		if (str[i] == '<' && str[i + 1] == '/')
 		{
 			int start = i + 2;
@@ -118,10 +121,8 @@ int	validator(char *str)
 			{
 				int len = i - start;
 				char *word = extract_tag(&str[start], len);
-				// Check if the words and position are correct for the tag.
-				if (check_words(&stack, word, len) == 1)
+				if (check_match(&stack, word, len) == 1)
 				{
-					// It's not a match
 					free(word);
 					t_list *temp;
 					while (stack)
@@ -129,18 +130,15 @@ int	validator(char *str)
 						temp = stack;
 						stack = stack->next;
 						free(temp->tag);
-						free(temp); // Clean up the remaining stack
+						free(temp);
 					}
-					// Return an error
 					return (1);
 				}
-				free(word);
 			}
 			i = start;
 		}
 		i++;
 	}
-	// If there are any unclosed tags, we free the stack and return an error.
 	if (stack != NULL)
 	{
 		t_list *temp;
@@ -153,22 +151,21 @@ int	validator(char *str)
 		}
 		return (1);
 	}
-	return (0);
+	else
+		return (0);
 }
 
-int	main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	if (argc != 2)
 		return (1);
-	if (argv[1][0] != '\0')
+	else
 	{
 		if (validator(argv[1]) == 0)
-		{
-			printf("0\n");
-			return (0);
-		}
-		printf("1\n");
-		return (1);
+			write(1, "OK\n", 3);
+		else
+			write(1, "NO\n", 3);
+		return (0);
 	}
-	return (1);
+	return (0);
 }

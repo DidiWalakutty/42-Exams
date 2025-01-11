@@ -54,5 +54,6 @@ int	main(int argc, char **argv)
 			write(1, "Error\n", 6);
 		i++;
 	}
+	return (1);
 }
 
