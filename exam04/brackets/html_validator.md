@@ -1,6 +1,6 @@
 Assignment name  : html_validator<br>
 Expected files   : *.c<br>
-Allowed functions: write, malloc, free, strncpy, strcmp<br>
+Allowed functions: write, malloc, free, strncpy, strncmp<br>
 --------------------------------------------------------------------------------
 
 You do not need to understand HTML for this assignment.<br>
