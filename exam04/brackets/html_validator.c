@@ -102,12 +102,11 @@ int	validator(char *str)
 				int len = i - start;
 				char *word = extract_tag(&str[start], len);
 				if (strncmp(word, "img", 3) == 0)
-					free(word);
+					i = start;
 				else
 				{
 					t_list *new = init_node(word);
 					lst_add_back(&stack, new);
-					// free(word);
 				}
 			}
 			i = start;
@@ -123,7 +122,6 @@ int	validator(char *str)
 				char *word = extract_tag(&str[start], len);
 				if (check_match(&stack, word, len) == 1)
 				{
-					free(word);
 					t_list *temp;
 					while (stack)
 					{
@@ -157,15 +155,12 @@ int	validator(char *str)
 
 int main(int argc, char **argv)
 {
-	if (argc != 2)
-		return (1);
-	else
+	if (argc == 2)
 	{
 		if (validator(argv[1]) == 0)
-			write(1, "OK\n", 3);
+			return (0);
 		else
-			write(1, "NO\n", 3);
-		return (0);
+			return (1);
 	}
-	return (0);
+	return (1);
 }

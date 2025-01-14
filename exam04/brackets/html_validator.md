@@ -1,5 +1,5 @@
 Assignment name  : html_validator<br>
-Expected files   : *.c<br>
+Expected files   : html_validator.c<br>
 Allowed functions: write, malloc, free, strncpy, strncmp<br>
 --------------------------------------------------------------------------------
 
