@@ -5,3 +5,7 @@ typedef struct s_node
 	struct s_node *right;
 } 	t_node;
 
+int	size(t_node *tree)
+{
+	
+}

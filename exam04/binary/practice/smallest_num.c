@@ -7,3 +7,7 @@ typedef struct s_node
 	struct s_node *right;
 } 	t_node;
 
+int smallest(t_node *tree)
+{
+	
+}
