@@ -6,9 +6,11 @@ typedef struct s_node {
 	struct s_node *right;
 }	t_node;
 
+// Sum up all node values in the tree.
+// Recursively add the values of the left and right subtrees to the root's value.
 int	tree_add(t_node *tree)
 {
-	int	sum;
+	int	sum = 0;
 	int	sum_left = 0;
 	int	sum_right = 0;
 

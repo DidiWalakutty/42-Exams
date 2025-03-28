@@ -3,11 +3,8 @@ typedef struct s_node
 	int	value;
 	struct s_node *left;
 	struct s_node *right;
-}	t_node;
+} 	t_node;
 
-// This function needs to swap the left and right child nodes (mirrors the node)
-// of every node in the tree.
-// Flip everything
 void	tree_swap(t_node *tree)
 {
 	if (!tree)
@@ -18,5 +15,5 @@ void	tree_swap(t_node *tree)
 	t_node *temp;
 	temp = tree->left;
 	tree->left = tree->right;
-	tree->right = temp;	
+	tree->right = temp;
 }

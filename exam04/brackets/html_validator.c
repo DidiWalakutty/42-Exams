@@ -158,9 +158,15 @@ int main(int argc, char **argv)
 	if (argc == 2)
 	{
 		if (validator(argv[1]) == 0)
+		{
+			write(1, "OK\n", 3);
 			return (0);
+		}
 		else
+		{
+			write(1, "ERROR\n", 6);
 			return (1);
+		}
 	}
 	return (1);
 }

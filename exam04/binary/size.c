@@ -5,6 +5,8 @@ typedef struct s_node
 	struct s_node *right;
 }	t_node;
 
+// Counts the numbers of nodes in the tree.
+// Recursively counts left and right subtrees and adds 1 for the current node.
 int	size(t_node *tree)
 {
 	if (!tree)
