@@ -14,9 +14,10 @@ t_btree* insert_binary_tree(t_btree *root, int value)
 		root->left = NULL;
 		root->right = NULL;
 	}
-	else if (value < root->value)
-		root->left = insert_binary_tree(root->left, value);
-	else if (value > root->value)
-		root->right = insert_binary_tree(root->right, value);
+	 else if (root->value > value)  // If root's value is greater than the new value, insert in the left subtree
+        root->left = insert_binary_tree(root->left, value);
+    else if (root->value < value)  // If root's value is smaller than the new value, insert in the right subtree
+        root->right = insert_binary_tree(root->right, value);
+  	// If root->value == value, we do nothing (duplicate values are ignored
 	return (root);
 }

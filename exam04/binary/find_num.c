@@ -32,6 +32,8 @@ typedef struct s_tree
 // Returns the node if we found that number
 t_tree	*findnum(t_node *tree, int num)
 {
+	if (!tree)
+		return (NULL);
 	if (tree->value == num)
 		return (tree);
 	if (tree->value > num)

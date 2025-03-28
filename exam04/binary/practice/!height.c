@@ -7,5 +7,5 @@ typedef struct s_node
 
 int	height(t_node *tree)
 {
-
+	
 }

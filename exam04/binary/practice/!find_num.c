@@ -10,7 +10,15 @@ typedef struct s_node
 // prints if found
 void	findnum(t_node *tree, int num)
 {
-
+	if (tree)
+	{
+		if (tree->value > num)
+			find_num(tree->left, num);
+		else if (tree->value < num)
+			find_num(tree->right, num);
+		else
+			printf("found\n");
+	}
 }
 
 /*
@@ -27,5 +35,12 @@ typedef struct s_tree
 // returns pointer to node with the value
 t_tree	*find_num(t_tree *tree, int num)
 {
-
+	if (!tree)
+		return (NULL);
+	if (tree->value == num)
+		return (tree);
+	if (tree->value > num)
+		return (find_num(tree->left, num));
+	else
+		return (find_num(tree->right, num));
 }

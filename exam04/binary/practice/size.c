@@ -7,5 +7,7 @@ typedef struct s_node
 
 int	size(t_node *tree)
 {
-	
+	if (!tree)
+		return (0);
+	return (1 + (size(tree->left)) + (size(tree->right)));
 }
