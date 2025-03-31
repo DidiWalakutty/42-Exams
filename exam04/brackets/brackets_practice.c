@@ -1,6 +1,6 @@
 #include <unistd.h>
 
-int	is_match(char a, char b)
+int	check_match(char a, char b)
 {
 	if ((a == '(' && b == ')') || (a == '{' && b == '}') || (a == '[' && b == ']'))
 		return (0);
@@ -15,20 +15,23 @@ int	is_valid(char *str)
 
 	while (str[i])
 	{
-		if (str[i] == '(' || str[i] == '[' || str[i] == '{')
+		if (str[i] == '(' || str[i] == '{' || str[i] == '[')
 		{
 			stack[top] = str[i];
 			top++;
 		}
-		if (str[i] == ')' || str[i] == ']' || str[i] == '}')
+		if (str[i] == ')' || str[i] == '}' || str[i] == ']')
 		{
-			if (top == 0 || is_match(stack[top - 1], str[i]) == 1)
+			if (top == 0 || check_match(stack[top - 1], str[i]) == 1)
 				return (1);
 			else
 				top--;
 		}
 		i++;
 	}
+	if (top != 0)
+		return (1);
+	return (0);
 }
 
 int	main(int argc, char **argv)
@@ -44,5 +47,5 @@ int	main(int argc, char **argv)
 			write(1, "Error\n", 6);
 		i++;
 	}
-	return (1);
+	return (0);
 }

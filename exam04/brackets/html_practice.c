@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 typedef struct s_list
 {
@@ -12,7 +11,8 @@ typedef struct s_list
 t_list	*init_node(char *word)
 {
 	t_list *new = malloc(sizeof(t_list));
-	
+	if (!new)
+		return (NULL);
 	new->tag = word;
 	new->next = NULL;
 	return (new);
@@ -25,7 +25,7 @@ t_list	*last_node(t_list *lst)
 	return (lst);
 }
 
-void	add_last_node(t_list **lst, t_list *new)
+void	lst_add_back(t_list **lst, t_list *new)
 {
 	t_list *back;
 	if (*lst)
@@ -39,8 +39,8 @@ void	add_last_node(t_list **lst, t_list *new)
 
 char	*extract_tag(char *str, int len)
 {
-	int i = 0;
 	char *tag = malloc(sizeof(char) * (len + 1));
+	int i = 0;
 	while (i < len && str[i] != ' ' && str[i] != '/')
 	{
 		tag[i] = str[i];
@@ -58,7 +58,7 @@ int ft_strlen(char *str)
 	return (i);
 }
 
-int	check_match(t_list **lst, char *tag, int len)
+int check_match(t_list **lst, char *tag, int len)
 {
 	if (*lst == NULL)
 		return (1);
@@ -86,7 +86,7 @@ int	check_match(t_list **lst, char *tag, int len)
 	return (1);
 }
 
-int	validator(char *str)
+int	is_valid(char *str)
 {
 	int i = 0;
 	t_list *stack = NULL;
@@ -101,13 +101,13 @@ int	validator(char *str)
 			if (str[i] == '>')
 			{
 				int len = i - start;
-				char *tag = extract_tag(&str[start], len);
-				if (strncmp(tag, "img", 3) == 0)
+				char *word = extract_tag(&str[start], len);
+				if (strncmp(word, "img", 3) == 0)
 					i = start;
 				else
 				{
-					t_list *new = init_node(tag);
-					add_last_node(&stack, new);
+					t_list *new = init_node(word);
+					lst_add_back(&stack, new);
 				}
 			}
 			i = start;
@@ -120,8 +120,8 @@ int	validator(char *str)
 			if (str[i] == '>')
 			{
 				int len = i - start;
-				char *tag = extract_tag(&str[start], len);
-				if (check_match(&stack, tag, len) == 1)
+				char *word = extract_tag(&str[start], len);
+				if (check_match(&stack, word, len) == 1)
 				{
 					t_list *temp;
 					while (stack)
@@ -157,9 +157,9 @@ int	main(int argc, char **argv)
 {
 	if (argc == 2)
 	{
-		if (validator(argv[1]) == 0)
+		if (is_valid(argv[1]) == 0)
 		{
-			write(1, "OK\n", 3);
+			write(1, "OK: 0\n", 6);
 			return (0);
 		}
 	}

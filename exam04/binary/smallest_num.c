@@ -9,7 +9,7 @@ typedef struct s_node {
 int smallest(t_node *tree)
 {
 	if (!tree)
-		return (INT_MAX); // or INT_MIN???
+		return (INT_MAX);
 	int	cur = tree->value;
 	int	left = smallest(tree->left);
 	int	right = smallest(tree->right);

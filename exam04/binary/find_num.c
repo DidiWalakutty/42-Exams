@@ -11,15 +11,14 @@ typedef struct s_node {
 // Prints if we found the node
 void	find_num(t_node *tree, int num)
 {
-	if (tree)
-	{
-		if (tree->value > num)
-			find_num(tree->left, num);
-		else if (tree->value < num)
-			find_num(tree->right, num);
-		else
-			printf("found\n");
-	}
+	if (!tree)
+		return ;
+	if (tree->value > num)
+		find_num(tree->left, num);
+	else if (tree->value < num)
+		find_num(tree->right, num);
+	else
+		printf("found\n");
 }
 
 typedef struct s_tree

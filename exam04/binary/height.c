@@ -20,9 +20,6 @@ int	height(t_node *tree)
 	int	height_left = height(tree->left);
 	int	height_right = height(tree->right);
 
-	// We need to pick the larger height, so
-	// if left is >, we return 1 + height_left.
-	// You pick the taller subtree and add 1 for the current node.
 	if (height_left > height_right)
 		return 1 + height_left;
 	else
