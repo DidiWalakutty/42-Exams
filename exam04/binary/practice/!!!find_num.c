@@ -10,7 +10,6 @@ typedef struct s_node
 // prints if found
 void	findnum(t_node *tree, int num)
 {
-
 }
 
 /*
