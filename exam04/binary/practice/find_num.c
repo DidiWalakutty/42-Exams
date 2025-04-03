@@ -26,5 +26,3 @@ typedef struct s_tree
 // returns pointer to node with the value
 t_tree	*find_num(t_tree *tree, int num)
 {
-
-}

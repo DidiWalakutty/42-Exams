@@ -7,13 +7,5 @@ typedef struct s_node
 
 int	height(t_node *tree)
 {
-	if (!tree)
-		return (-1);
-	int left = height(tree->left);
-	int right = height(tree->right);
 
-	if (left > right)
-		return (1 + left);
-	else
-		return (1 + right);
 }

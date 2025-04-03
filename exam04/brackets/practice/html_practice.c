@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct s_list
+typedef struct s_lits
 {
 	char			*tag;
 	struct s_list	*next;
 }	t_list;
 
-t_list	*init_node(char *word)
+t_list *init_node(char *word)
 {
 	t_list *new = malloc(sizeof(t_list));
 	if (!new)
@@ -34,13 +34,17 @@ void	lst_add_back(t_list **lst, t_list *new)
 		back->next = new;
 	}
 	else
-		*lst = new;
+	{
+		*lst = back;
+	}
 }
 
 char	*extract_tag(char *str, int len)
 {
-	char *tag = malloc(sizeof(char) * (len + 1));
 	int i = 0;
+	char *tag = malloc(sizeof(char) * (len + 1));
+	if (!tag)
+		return (0);
 	while (i < len && str[i] != ' ' && str[i] != '/')
 	{
 		tag[i] = str[i];
@@ -50,15 +54,7 @@ char	*extract_tag(char *str, int len)
 	return (tag);
 }
 
-int ft_strlen(char *str)
-{
-	int i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-int check_match(t_list **lst, char *tag, int len)
+int	validator(t_list **lst, char *word, int len)
 {
 	if (*lst == NULL)
 		return (1);
@@ -72,7 +68,7 @@ int check_match(t_list **lst, char *tag, int len)
 	}
 	if (len == ft_strlen(current->tag))
 	{
-		if (current && strncmp(current->tag, tag, len) == 0)
+		if (current && strncmp(current->tag, word, len) == 0)
 		{
 			if (previous == NULL)
 				*lst = NULL;
@@ -121,7 +117,7 @@ int	is_valid(char *str)
 			{
 				int len = i - start;
 				char *word = extract_tag(&str[start], len);
-				if (check_match(&stack, word, len) == 1)
+				if (validator(&stack, word, len) == 1)
 				{
 					t_list *temp;
 					while (stack)
@@ -159,10 +155,10 @@ int	main(int argc, char **argv)
 	{
 		if (is_valid(argv[1]) == 0)
 		{
-			write(1, "OK: 0\n", 6);
+			write(1, "0\n", 2);
 			return (0);
 		}
 	}
-	write(1, "Error: 1\n", 9);
+	write(1, "1\n", 2);
 	return (1);
 }
