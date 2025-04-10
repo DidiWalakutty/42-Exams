@@ -35,3 +35,7 @@ and is closed immediately.
 An opening tag must always be closed by the corresponding closing tag in
 the correct order.
 A string that does not contain any tag is considered as a correctly formatted string.
+
+tests:
+- '<test> </test>'
+- '<test> <test_2> <third_tag some_name"ONERING!"> </third_tag> </test_2> </test_>'

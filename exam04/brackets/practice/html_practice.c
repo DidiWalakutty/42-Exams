@@ -1,8 +1,8 @@
 #include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
-typedef struct s_lits
+typedef struct s_list
 {
 	char			*tag;
 	struct s_list	*next;
@@ -18,7 +18,7 @@ t_list *init_node(char *word)
 	return (new);
 }
 
-t_list	*last_node(t_list *lst)
+t_list *last_node(t_list *lst)
 {
 	while (lst && lst->next)
 		lst = lst->next;
@@ -27,24 +27,22 @@ t_list	*last_node(t_list *lst)
 
 void	lst_add_back(t_list **lst, t_list *new)
 {
-	t_list *back;
+	t_list *back = NULL;
 	if (*lst)
 	{
 		back = last_node(*lst);
 		back->next = new;
 	}
 	else
-	{
-		*lst = back;
-	}
+		*lst = new;
 }
 
 char	*extract_tag(char *str, int len)
 {
-	int i = 0;
 	char *tag = malloc(sizeof(char) * (len + 1));
 	if (!tag)
 		return (0);
+	int i = 0;
 	while (i < len && str[i] != ' ' && str[i] != '/')
 	{
 		tag[i] = str[i];
@@ -54,7 +52,15 @@ char	*extract_tag(char *str, int len)
 	return (tag);
 }
 
-int	validator(t_list **lst, char *word, int len)
+int	ft_strlen(char *str)
+{
+	int i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int	check_words(t_list **lst, char *word, int len)
 {
 	if (*lst == NULL)
 		return (1);
@@ -117,7 +123,7 @@ int	is_valid(char *str)
 			{
 				int len = i - start;
 				char *word = extract_tag(&str[start], len);
-				if (validator(&stack, word, len) == 1)
+				if (check_words(&stack, word, len) == 1)
 				{
 					t_list *temp;
 					while (stack)
