@@ -9,10 +9,10 @@ class Warlock
 		std::string _title;
 
 	public:
-		Warlock() = delete;									// needed?
+		Warlock() = delete;
+		Warlock(const Warlock& copy) = delete;
+		Warlock& operator=(const Warlock& assign) = delete;
 		Warlock(const std::string& name, const std::string& title);
-		Warlock(const Warlock& copy) = delete;					// needed?
-		Warlock& operator=(const Warlock& assign) = delete;	// needed?
 		~Warlock();
 		
 		const std::string& getName() const;

@@ -31,6 +31,7 @@ void Warlock::setTitle(const std::string &title)
 	this->_title = title;
 }
 
+// Main for testing
 int main()
 {
   Warlock const richard("Richard", "Mistress of Magma");
