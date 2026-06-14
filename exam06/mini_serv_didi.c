@@ -27,7 +27,7 @@ typedef struct s_client
 
 t_client clients[4096];		// 4096 is the max number of fds, so we can use fd as index to store client info
 char receive_buff[1024 + 1];	// buffer for receiving data, +1 for null terminator
-char send_buff[1024];			// buffer for sending data
+char write_buff[1024];			// buffer for sending data
 
 void	fatal_error(void)
 {
@@ -91,11 +91,11 @@ int main(int argc, char **argv)
 		write(2, "Wrong number of arguments\n", strlen("Wrong number of arguments\n"));
 		exit(1);
 	}
+
 	int port = atoi(argv[1]);
 
 	// 2. Socket variables
 	int socket_fd;
-
 	socklen_t client_len;							// length of client address structure
 	struct sockaddr_in server_addr, client_addr;	// server and client address structures
 	
@@ -159,13 +159,13 @@ int main(int argc, char **argv)
 					clients[connect_fd].message_buffer = NULL; // Initialize message buffer for the client
 					
 					// prepare the join message + broadcast to every other writable client
-					sprintf(send_buff, "server: client %d just arrived\n", clients[connect_fd].id);
+					sprintf(write_buff, "server: client %d just arrived\n", clients[connect_fd].id);
 					for (int i = 0; i <= max_fd; i++)
 					{
 						// send to all writable clients except the new client and the listening socket
 						if (FD_ISSET(i, &write_fds) && i != connect_fd && i != socket_fd)
 						{
-							send(i, send_buff, strlen(send_buff), 0);
+							send(i, write_buff, strlen(write_buff), 0);
 						}
 					}
 					break;
@@ -181,12 +181,12 @@ int main(int argc, char **argv)
 				if (recv_bytes <= 0)
 				{
 					// recv <= 0 means client is gone, so notify + clean up
-					sprintf(send_buff, "server: client %d just left\n", clients[fd].id);
+					sprintf(write_buff, "server: client %d just left\n", clients[fd].id);
 					for (int i = 0; i <= max_fd; i++)
 					{
 						if (FD_ISSET(i, &write_fds) && i != fd && i != socket_fd)
 						{
-							send(i, send_buff, strlen(send_buff), 0);
+							send(i, write_buff, strlen(write_buff), 0);
 						}
 					}
 					free(clients[fd].message_buffer); // Clean up client's message buffer
@@ -207,12 +207,12 @@ int main(int argc, char **argv)
 					while ((ret = extract_message(&clients[fd].message_buffer, &msg)) > 0)
 					{
 						// for each complete line, first sent client prefix
-						sprintf(send_buff, "client %d: ", clients[fd].id);
+						sprintf(write_buff, "client %d: ", clients[fd].id);
 						for (int i = 0; i <= max_fd; i++)
 						{
 							if (FD_ISSET(i, &write_fds) && i != fd && i != socket_fd)
 							{
-								send(i, send_buff, strlen(send_buff), 0);
+								send(i, write_buff, strlen(write_buff), 0);
 							}
 						}
 						// then send extracted message itself to the same recipients
