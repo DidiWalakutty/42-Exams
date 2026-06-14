@@ -19,11 +19,11 @@
  * 5. Handle disconnections
  */
 
- typedef struct s_client 
- {
+typedef struct s_client 
+{
 	int 	id;
 	char	*message_buffer;
- } t_client;
+} t_client;
 
 t_client clients[4096];		// 4096 is the max number of fds, so we can use fd as index to store client info
 char receive_buff[1024 + 1];	// buffer for receiving data, +1 for null terminator
@@ -39,7 +39,7 @@ void	fatal_error(void)
 int extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
-	int	i;
+	int		i;
 
 	*msg = 0;
 	if (*buf == 0)
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	// 3. Create socket
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0); 	// Sets up a TCP socket
 	if (socket_fd < 0)
-	fatal_error();
+		fatal_error();
 	
 	// 4. Initialize server address structure
 	fd_set active_fds, read_fds, write_fds;			// fd sets for select: active_fds tracks all active fds, read_fds (whos talking) and write_fds (whos ready to receive)
@@ -138,9 +138,11 @@ int main(int argc, char **argv)
 		// 9. Check which fd has events
 		for (int fd = 0; fd <= max_fd; fd++)
 		{
+			// returns nonzero if the fd is present in set, and zero if it is not.
 			if (!FD_ISSET(fd, &read_fds))
 				continue;
 			
+			// new client connection
 			if (fd == socket_fd)
 			{
 				// listening socket became readable, client is waiting
@@ -148,6 +150,7 @@ int main(int argc, char **argv)
 				int connect_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &client_len);
 				if (connect_fd >= 0)
 				{
+					// track new client, give it an id, and add it to the monitored set
 					if (max_fd < connect_fd)
 						max_fd = connect_fd;
 
@@ -159,6 +162,7 @@ int main(int argc, char **argv)
 					sprintf(send_buff, "server: client %d just arrived\n", clients[connect_fd].id);
 					for (int i = 0; i <= max_fd; i++)
 					{
+						// send to all writable clients except the new client and the listening socket
 						if (FD_ISSET(i, &write_fds) && i != connect_fd && i != socket_fd)
 						{
 							send(i, send_buff, strlen(send_buff), 0);
@@ -169,6 +173,7 @@ int main(int argc, char **argv)
 				else
 					fatal_error();
 			}
+			// existing client sent data or closed the connection
 			else
 			{
 				// a connected client sent data or closed the connection
@@ -198,7 +203,8 @@ int main(int argc, char **argv)
 						fatal_error();
 
 					char *msg;
-					while (extract_message(&clients[fd].message_buffer, &msg))
+					int ret;
+					while ((ret = extract_message(&clients[fd].message_buffer, &msg)) > 0)
 					{
 						// for each complete line, first sent client prefix
 						sprintf(send_buff, "client %d: ", clients[fd].id);
@@ -219,6 +225,8 @@ int main(int argc, char **argv)
 						}
 						free(msg);
 					}
+					if (ret < 0)
+						fatal_error();
 				}
 			}
 		}	

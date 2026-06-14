@@ -33,7 +33,7 @@ void	fatal_error(void)
 int extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
-	int	i;
+	int		i;
 
 	*msg = 0;
 	if (*buf == 0)
