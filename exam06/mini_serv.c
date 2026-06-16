@@ -4,10 +4,11 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
+// add
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <sys/select.h> // select
+#include <sys/select.h>
 
 /**
  * @ brief mini_serv has 5 jobs
@@ -25,7 +26,7 @@ typedef struct s_client
 	char	*message_buffer;
 } t_client;
 
-t_client clients[4096];		// 4096 is the max number of fds, so we can use fd as index to store client info
+t_client clients[4096];			// 4096 is the max number of fds, so we can use fd as index to store client info
 char receive_buff[1024 + 1];	// buffer for receiving data, +1 for null terminator
 char write_buff[1024];			// buffer for sending data
 
@@ -35,7 +36,7 @@ void	fatal_error(void)
 	exit(1);
 }
 
-// 1. copy functions from main
+// you can copy extract_message and str_join from given main. 
 int extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
@@ -85,7 +86,6 @@ char *str_join(char *buf, char *add)
 
 int main(int argc, char **argv)
 {
-	// 1. argument check + port number parsing
 	if (argc != 2)
 	{
 		write(2, "Wrong number of arguments\n", strlen("Wrong number of arguments\n"));
@@ -94,71 +94,61 @@ int main(int argc, char **argv)
 
 	int port = atoi(argv[1]);
 
-	// 2. Socket variables
 	int socket_fd;
 	socklen_t client_len;							// length of client address structure
 	struct sockaddr_in server_addr, client_addr;	// server and client address structures
 	
-	// 3. Create socket
-	socket_fd = socket(AF_INET, SOCK_STREAM, 0); 	// Sets up a TCP socket
+	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0)
 		fatal_error();
 	
-	// 4. Initialize server address structure
-	fd_set active_fds, read_fds, write_fds;			// fd sets for select: active_fds tracks all active fds, read_fds (whos talking) and write_fds (whos ready to receive)
-	FD_ZERO(&active_fds); 			// Initialize the active fd set
-	FD_SET(socket_fd, &active_fds); // Add the listening socket to the active
+	fd_set active_fds, read_fds, write_fds;
+	FD_ZERO(&active_fds); 					// Initialize the active fd set
+	FD_SET(socket_fd, &active_fds); 		// Add the listening socket to the active
 
-	int max_fd = socket_fd; 			// Track the maximum fd for select
-	int next_client_id = 0;				// To assign unique IDs to clients
+	int max_fd = socket_fd;
+	int next_client_id = 0;
 
-	// 5. Set up the server address structure
-	bzero(&server_addr, sizeof(server_addr)); // Zero out the server address structure
 
-	server_addr.sin_family = AF_INET;					// Set address family to IPv4
-	server_addr.sin_addr.s_addr = htonl(2130706433); 	// Set IP to 127.0.0.1
-	server_addr.sin_port = htons(port);					// Set port from argument
+	bzero(&server_addr, sizeof(server_addr));
+	// given in main:
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = htonl(2130706433);
+	server_addr.sin_port = htons(port);
 
-	// 6. Bind and listen
 	if (bind(socket_fd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) != 0)
 		fatal_error();
 	
 	if (listen(socket_fd, SOMAXCONN) != 0)
 		fatal_error();
 
-	// 7. Main loop to handle events
 	while (1)
 	{
 		read_fds = write_fds = active_fds; // Copy the active fd set to readfds and writefds for select
 		
-		// 8. Wait for events with select()
+		// Wait for events with select()
 		if (select(max_fd + 1, &read_fds, &write_fds, NULL, NULL) < 0)
 			fatal_error();
 
-		// 9. Check which fd has events
 		for (int fd = 0; fd <= max_fd; fd++)
 		{
-			// returns nonzero if the fd is present in set, and zero if it is not.
 			if (!FD_ISSET(fd, &read_fds))
 				continue;
 			
-			// new client connection
-			if (fd == socket_fd)
-			{
-				// listening socket became readable, client is waiting
+				if (fd == socket_fd)
+				{
+				// new client connection
 				client_len = sizeof(client_addr);
 				int connect_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &client_len);
 				if (connect_fd >= 0)
 				{
-					// track new client, give it an id, and add it to the monitored set
 					if (max_fd < connect_fd)
 						max_fd = connect_fd;
 
-					FD_SET(connect_fd, &active_fds); // Add new client socket to active
-					clients[connect_fd].id = next_client_id++; // Assign an ID to the new client
-					clients[connect_fd].message_buffer = NULL; // Initialize message buffer for the client
+					FD_SET(connect_fd, &active_fds);			// Add new client socket to active
+					clients[connect_fd].id = next_client_id++;	// Assign an ID to the new client
+					clients[connect_fd].message_buffer = NULL;
 					
-					// prepare the join message + broadcast to every other writable client
 					sprintf(write_buff, "server: client %d just arrived\n", clients[connect_fd].id);
 					for (int i = 0; i <= max_fd; i++)
 					{
@@ -173,14 +163,13 @@ int main(int argc, char **argv)
 				else
 					fatal_error();
 			}
-			// existing client sent data or closed the connection
 			else
 			{
 				// a connected client sent data or closed the connection
-				int recv_bytes = recv(fd, receive_buff, sizeof(receive_buff) - 1, 0); // receive data from client
+				int recv_bytes = recv(fd, &receive_buff, sizeof(receive_buff) - 1, 0);
 				if (recv_bytes <= 0)
 				{
-					// recv <= 0 means client is gone, so notify + clean up
+					// client is disconnected
 					sprintf(write_buff, "server: client %d just left\n", clients[fd].id);
 					for (int i = 0; i <= max_fd; i++)
 					{
@@ -189,24 +178,23 @@ int main(int argc, char **argv)
 							send(i, write_buff, strlen(write_buff), 0);
 						}
 					}
-					free(clients[fd].message_buffer); // Clean up client's message buffer
-					FD_CLR(fd, &active_fds); // Remove client fd from active set
-					close(fd); // Close the client socket
+					free(clients[fd].message_buffer);
+					FD_CLR(fd, &active_fds);
+					close(fd);
 					break;
 				}
 				else
 				{
-					// client sent a message, so we need to broadcast it until '\n'
+					// client sent a message
 					receive_buff[recv_bytes] = '\0';
 					clients[fd].message_buffer = str_join(clients[fd].message_buffer, receive_buff);
-					if (!clients[fd].message_buffer) // Null-terminate the received message
+					if (!clients[fd].message_buffer)
 						fatal_error();
 
 					char *msg;
 					int ret;
 					while ((ret = extract_message(&clients[fd].message_buffer, &msg)) > 0)
 					{
-						// for each complete line, first sent client prefix
 						sprintf(write_buff, "client %d: ", clients[fd].id);
 						for (int i = 0; i <= max_fd; i++)
 						{
@@ -215,7 +203,6 @@ int main(int argc, char **argv)
 								send(i, write_buff, strlen(write_buff), 0);
 							}
 						}
-						// then send extracted message itself to the same recipients
 						for (int i = 0; i <= max_fd; i++)
 						{
 							if (FD_ISSET(i, &write_fds) && i != fd && i != socket_fd)
